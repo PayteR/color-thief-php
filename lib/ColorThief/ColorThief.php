@@ -179,6 +179,7 @@ class ColorThief
         $startY = 0;
         $width  = $image->getWidth();
         $height = $image->getHeight();
+        $pixelArrayLengthMax = 192000; // it corresponds to max resolution 1600x1200px and quality 10
 
         if ($area) {
             $startX = isset($area['x']) ? $area['x'] : 0;
@@ -195,7 +196,12 @@ class ColorThief
 
         // Store the RGB values in an array format suitable for quantize function
         // SplFixedArray is faster and more memory-efficient than normal PHP array.
-        $pixelArray = new SplFixedArray(ceil($pixelCount / $quality));
+        $pixelArrayLength = ceil($pixelCount/$quality);
+        if($pixelArrayLength >= $pixelArrayLengthMax) {
+            $quality = floor(($pixelArrayLength / $pixelArrayLengthMax) * $quality);
+            $pixelArrayLength = ceil($pixelCount/$quality);
+        }
+        $pixelArray = new SplFixedArray($pixelArrayLength);
 
         $size = 0;
         for ($i = 0; $i < $pixelCount; $i = $i + $quality) {
